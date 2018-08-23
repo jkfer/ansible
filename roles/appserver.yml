@@ -1,0 +1,14 @@
+# Master playbook for webserver:
+#
+- hosts: apacheweb
+  user: test
+  sudo: yes
+  connection: ssh
+  pre_tasks:
+  - name: START TIME
+    raw: date > /home/test/startofrole.log
+  roles:
+    - appserver
+  post_tasks:  
+  - name: END TIME
+    raw: date > /home/test/endofrole.log

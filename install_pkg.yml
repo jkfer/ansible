@@ -1,0 +1,11 @@
+- hosts: all
+  user: test
+  sudo: yes
+  vars_prompt:
+    - name: pkg_name
+      prompt: provide package to be installed
+  tasks:
+    - name: Install {{ pkg_name }}
+      yum:
+        pkg={{ pkg_name }}
+        state=installed

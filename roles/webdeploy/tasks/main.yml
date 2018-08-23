@@ -1,0 +1,23 @@
+# ---
+# tasks file for webdeploy
+- name: Install HTTPD
+  yum: pkg={{ item }} state=latest
+  with_items:
+    - httpd
+    - httpd-manual
+
+- name: check if HTTPD service is running
+  shell: 'if systemctl status httpd | grep -o "Active: active"; then echo "httpd_running"; else echo "httpd_not_running";fi 2>/dev/null'
+  ignore_errors: true
+  register: httpd_status 
+
+- name: Restart and enable HTTPD if it is not running
+  shell: 'echo "restarting and enabling httpd" >> /home/test/webdeploy.log'
+  when: httpd_status.stdout == "httpd_not_running"
+  notify: Enable and restart HTTPD
+  
+- name: Enable HTTPD if it is already running
+  shell: 'echo "enabling httpd" >> /home/test/webdeploy.log'
+  when: httpd_status.stdout == "httpd_running"
+  notify: Enable HTTPD
+

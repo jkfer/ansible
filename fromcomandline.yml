@@ -1,0 +1,12 @@
+--- # passing variables at a command line - example
+# run this with passing variables from the commandline:
+# ansible-playbook fromcomandline.yml --extra-vars "hosts=apacheweb user=test pkg=telnet"
+
+- hosts: '{{ hosts }}'
+  user: '{{ user }}'
+  sudo: yes
+  connection: ssh
+  gather_facts: no
+  tasks:
+    - name: Install some software
+      yum: pkg={{ pkg }} state=latest

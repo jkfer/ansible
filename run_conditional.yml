@@ -1,0 +1,14 @@
+--- # WHEN playbook example. Distribution based installation
+- hosts: all
+  user: test
+  sudo: yes
+  connection: ssh
+  gather_facts: yes
+  tasks:
+    - name: Install apache appropriately to distribution type (Debian/Ubuntu)
+      command: apt-get -y install apache2
+      when: ansible_os_family == "Debian"
+
+    - name: Install apache appropriately to distribution type (Redhat/CentOS)
+      command: yum -y install httpd
+      when: ansible_os_family == "RedHat"

@@ -1,0 +1,8 @@
+---
+# handlers file for webdeploy
+#
+- name: Enable and restart HTTPD
+  service: name=httpd state=restarted enabled=yes
+
+- name: Enable HTTPD
+  service: name=httpd enabled=yes
