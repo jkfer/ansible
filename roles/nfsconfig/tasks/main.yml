@@ -1,0 +1,12 @@
+---
+# tasks file for nfsconfig
+#
+#
+- name: Configuring NFS Server
+  import_tasks: nfsserver.yml
+  when: type == "server"
+
+
+- name: Configuring NFS Client(s)
+  import_tasks: nfsclient.yml
+  when: type == "client"

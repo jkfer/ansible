@@ -1,0 +1,10 @@
+---
+# handlers file for nfsconfig
+#
+- name: NFS Services
+  service: name={{ item }} state=restarted enabled=yes
+  with_items:
+    - nfs
+    - nfs-server
+    - nfs-idmapd
+    - rpcbind

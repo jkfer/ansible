@@ -1,0 +1,5 @@
+---
+# vars file for nfsconfig
+#
+nfs_share: "/nfs_public"
+nfs_mountpoint: "/mnt/nfs"

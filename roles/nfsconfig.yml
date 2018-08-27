@@ -1,0 +1,29 @@
+# This is a playbook to use with the nfsconfig rules:
+#
+- hosts: nfs_server
+  user: test
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars:
+    - type: "server"
+  roles:
+    - nfsconfig
+  tasks:
+    - name: Assigning NFS Server name to a variable
+      set_fact:
+        NFS_Server: "{{ ansible_nodename }}"
+
+
+
+- hosts: nfs_client
+  user: test
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars:
+    - type: "client"
+    - NFSServer: "{{ hostvars[groups['nfs_server'][0]]['NFS_Server'] }}"
+  roles:
+    - nfsconfig
+
