@@ -18,7 +18,7 @@ Requirements
 - nfs_server: One host to provide the newtwork file share location to clients
 - nfs_client: Hosts readily available to access the network files share. Shared directory to be mounted here.
 
-Server/client distribution to be RedHat/CentOS/Debian
+#### Server/client distribution to be RedHat/CentOS/Debian
 
 Role Variables
 --------------
