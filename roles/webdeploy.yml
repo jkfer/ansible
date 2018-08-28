@@ -1,3 +1,5 @@
+# Basic test of webdeploying
+
 - hosts: apacheweb
   user: test
   become: yes

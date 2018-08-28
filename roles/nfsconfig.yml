@@ -1,5 +1,6 @@
-# This is a playbook to use with the nfsconfig rules:
-#
+# This is a playbook to use with the nfsconfig roles:
+# 
+# Configuring the NFS Server
 - hosts: nfs_server
   user: test
   become: yes
@@ -15,7 +16,7 @@
         NFS_Server: "{{ ansible_nodename }}"
 
 
-
+# Configuring the NFS client(s)
 - hosts: nfs_client
   user: test
   become: yes
