@@ -4,7 +4,7 @@
 
 #### user_vars.yml
 
-add user information here.
+Add user information here.
 
 #### pubkeys/
 
