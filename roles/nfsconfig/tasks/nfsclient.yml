@@ -1,5 +1,9 @@
 # This is a list of tasks to be performed on the NFS client(s) machine:
 #
+#
+
+# Install the required nfs packages:
+#
 - name: Install nfs-utils for Redhat or CentOS distribution
   yum: name="nfs-utils" state=latest
   when: ("ansible_distribution" == "RedHat") or ("ansible_distribution" == "CentOS")
@@ -14,14 +18,20 @@
   notify: NFS Services
 
 
+# Create the mount point directory on the client:
+#
 - name: Create the mountpoint {{ nfs_mountpoint }}
   file: path={{ nfs_mountpoint }} state=directory mode=0777
 
 
+# Perform the mounting action
+#
 - name: mount the drive from {{ NFSServer }}
   mount: path={{ nfs_mountpoint }} src={{ NFSServer }}:{{ nfs_share }} fstype=nfs opts=rw,sync state=present
   notify: NFS Services
 
 
+# Now show the mounted drives in the system:
+#
 - name: Show the mounted drives in the client machine
   shell: df -h

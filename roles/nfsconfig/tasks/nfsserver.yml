@@ -1,5 +1,7 @@
 # This is a list of tasks to be performed on the nfs server:
 #
+# Install NFS on server:
+#
 - name: Install nfs-utils for Redhat or CentOS distribution
   yum: name="nfs-utils" state=latest
   when: ("ansible_distribution" == "RedHat") or ("ansible_distribution" == "CentOS")
@@ -13,11 +15,14 @@
   tags: nfs_server-install, nfs_client_install
   notify: NFS Services
 
-
+# Create the NFS directory to be shared to clients:
+# 
 - name: Create the {{ nfs_share }} directory
   file: path={{ nfs_share }} state=directory mode=0777
 
 
+# Create the NFS /etc/exports file to export the directory to clients. Restart services once done.
+#
 - name: Copy the template to /etc/exports location of NFS Server
   template: src=templates/exports.j2 dest=/etc/exports owner=root group=root mode=755
   tags: copy_export

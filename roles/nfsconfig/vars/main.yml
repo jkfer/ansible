@@ -1,5 +1,7 @@
 ---
 # vars file for nfsconfig
 #
+# Define your nfs_share and mountpoint directories here:
+#
 nfs_share: "/nfs_public"
 nfs_mountpoint: "/mnt/nfs"

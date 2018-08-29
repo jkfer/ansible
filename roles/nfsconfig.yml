@@ -6,6 +6,7 @@
   become: yes
   become_method: sudo
   gather_facts: yes
+  # Only run the tasks intented for NFS Server 
   vars:
     - type: "server"
   roles:
@@ -22,6 +23,7 @@
   become: yes
   become_method: sudo
   gather_facts: yes
+  # Only run the tasks intented for NFS Client
   vars:
     - type: "client"
     - NFSServer: "{{ hostvars[groups['nfs_server'][0]]['NFS_Server'] }}"

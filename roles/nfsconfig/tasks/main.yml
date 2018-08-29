@@ -1,7 +1,10 @@
 ---
 # tasks file for nfsconfig
 #
-#
+# --- The appropriate tasks are imported based on Server/Client
+# Server tasks: nfsserver.yml
+# Client tasks: nfsclient.yml
+
 - name: Configuring NFS Server
   import_tasks: nfsserver.yml
   when: type == "server"

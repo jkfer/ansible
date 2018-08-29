@@ -1,6 +1,7 @@
 ---
 # handlers file for nfsconfig
-#
+
+# Restarting the NFS related services
 - name: NFS Services
   service: name={{ item }} state=restarted enabled=yes
   with_items:
