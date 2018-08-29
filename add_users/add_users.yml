@@ -1,0 +1,30 @@
+# This is a playbook to add users with authorized.keys to clients.
+#
+#
+- hosts: all
+  user: test
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars_files:
+    - user_vars.yml
+
+  tasks:
+
+# Adding the users defines in the user_vars directory:
+    - name: Adding the users
+      user: name={{ item.username }} shell=/bin/bash create_home=True
+      with_items: "{{ users }}"
+
+# Adding the sudo users to wheel group
+    - name: Providing sudo permissions where applicable
+      user: name={{ item.username }} shell=/bin/bash groups=wheel append=yes
+      when: "{{ item.sudo }} == True"
+      with_items: "{{ users }}"
+
+# Copying the user SSH keys to all servers:
+    - name: Copy SSH keys to destination
+      authorized_key: user={{ item.username }} key={{ lookup('file', 'pubkeys/id.rsa.{{ item.username }}.pub') }} path="/home/{{ item.username }}/.ssh/authorized_keys"
+      with_items: "{{ users }}"
+  
+
