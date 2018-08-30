@@ -1,23 +1,42 @@
 # ---
-# tasks file for webdeploy
+# tasks file for basic web server deployment
+#
+# Install HTTPD
 - name: Install HTTPD
   yum: pkg={{ item }} state=latest
   with_items:
     - httpd
     - httpd-manual
 
+
+# Copy the webpage content to the destination webroot /var/www/html
+- name: Copy webpage to destination web root directory
+  template: src=templates/index.html.j2 dest=/var/www/html/index.html mode=0777
+
+
+# Copy the virtual host template to the correct destination
+- name: Copy vhosts file to destination
+  template: src=templates/vhosts.conf.j2 dest=/etc/httpd/conf.d/vhosts.conf
+
+
+# Status of HTTPD service
 - name: check if HTTPD service is running
-  shell: 'if systemctl status httpd | grep -o "Active: active"; then echo "httpd_running"; else echo "httpd_not_running";fi 2>/dev/null'
+  shell: "if systemctl status httpd | grep -qo 'Active: active' > /dev/null; then echo 'httpd_running'; else echo 'httpd_not_running'; fi"
   ignore_errors: true
   register: httpd_status 
+  
 
+# Restart and enable HTTPD if the service is not running
 - name: Restart and enable HTTPD if it is not running
-  shell: 'echo "restarting and enabling httpd" >> /home/test/webdeploy.log'
+  shell: echo "Enabling and restarting HTTPD - " `date` >> /home/test/httpd.service.log
   when: httpd_status.stdout == "httpd_not_running"
   notify: Enable and restart HTTPD
   
+
+# Enable HTTPD if it is already running
 - name: Enable HTTPD if it is already running
-  shell: 'echo "enabling httpd" >> /home/test/webdeploy.log'
+  shell: echo "Enabling HTTPD - " `date` >> /home/test/httpd.service.log
   when: httpd_status.stdout == "httpd_running"
   notify: Enable HTTPD
+
 

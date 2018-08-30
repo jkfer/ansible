@@ -1,8 +1,9 @@
-# Basic test of webdeploying
-
 - hosts: apacheweb
   user: test
   become: yes
   become_method: sudo
+  gather_facts: yes
+  vars:
+    web_server_name: "{{ ansible_nodename }}"
   roles: 
     - webdeploy

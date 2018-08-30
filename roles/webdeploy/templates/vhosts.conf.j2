@@ -1,0 +1,8 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@{{ web_server_name }}
+    DocumentRoot "/var/www/html"
+    ServerName {{ web_server_name }}
+    ServerAlias www.{{ web_server_name }}
+    ErrorLog "/var/log/httpd/{{ web_server_name }}-error_log"
+    CustomLog "/var/log/httpd/{{ web_server_name }}-access_log" common
+</VirtualHost>

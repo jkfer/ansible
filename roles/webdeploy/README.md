@@ -1,20 +1,32 @@
-Role Name
-=========
+Description
+===========
 
-A role to install and configure HTTPD on hosts. (will be expanded)
+This role installs apache on target hosts. Creates a virtual host on <hostname>.
+
 
 Requirements
 ------------
 
-None. This is only a test. Will be expanded to HTTPD being configured *.conf files copied and web page made availablle for groups. 
+Target hosts OS: RedHat or Cent OS
 
 Role Variables
 --------------
 
-None at this time. Will have webpage and conf file variable referenced.
+Some variables used within the tasks to find HTTPD status and also in the templates to include hostname.
 
 Dependencies
 ------------
 
-Not at this time. 
+templates/index.html.j2  - Jinja template for webserver index page.
+templates/vhosts.conf.j2 - Virtual host configuration file
+
+Example Playbook
+----------------
+
+    - hosts: servers
+      gather_facts: yes
+      vars:
+        web_server_name: "{{ ansible_nodename }}"
+      roles:
+        - webdeploy
 
