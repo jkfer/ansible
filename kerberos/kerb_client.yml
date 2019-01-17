@@ -1,0 +1,75 @@
+- hosts: 192.168.0.29
+  user: joseph
+  sudo: yes
+  gather_facts: yes
+  vars:
+   user_password: !vault |
+            $ANSIBLE_VAULT;1.1;AES256
+            63623535343733383537646333353162636232623961326564613338353134313335323030623038
+            3466353864303534336465633231303762363132376338630a623439643339386534326264613465
+            65363235376238333163363534653335313333353630323133656432623338303731643937303837
+            3163306538636161660a316364313865663166313733333131643762306333353035306334353166
+            3031
+  tasks:
+
+# Install components required for the server
+  - name: Install Kerberos Client Requirements
+    yum: pkg={{ item }} state=latest
+    with_items:
+      - krb5-workstation
+      - pam_krb5
+      - firewalld
+
+# Copy krb5.conf to /etc/krb5.conf to set the default realm
+  - name: Copy krb5.conf to /etc/krb5.conf
+    copy: src='krb5.conf' dest='/etc/krb5.conf' owner='root' group='root' mode='0644'
+
+# Add the testuser here
+  - name: Creating testuser
+    user: name=testuser password='{{user_password}}' state=present shell=/bin/bash createhome=yes
+  
+
+# Add client to the realm using a random key - kadmin needs password input ???
+  - name: Add client to realm
+    shell: echo "ank -randkey host/`hostname`" | sudo /usr/bin/kadmin -w '123456'
+
+
+
+# Store changes to the local keytab file
+  - name: Save all configuration changes to keytab file
+    shell: echo "ktadd host/`hostname`" | sudo /usr/bin/kadmin -w '123456'
+
+
+
+# Configuring the GSSAPIAuthentication and GSSAPIDelegateCredentials
+  - name: replace lines in /etc/ssh/ssh_config
+    lineinfile: path=/etc/ssh/ssh_config regexp="GSSAPIAuthentication no" line="GSSAPIAuthentication yes"
+
+
+  - name: replace lines in /etc/ssh/ssh_config
+    lineinfile: path=/etc/ssh/ssh_config regexp="GSSAPIDelegateCredentials no" line="GSSAPIDelegateCredentials yes"
+
+
+# Reload the SSHD service
+  - name: Reload the SSH Service
+    service: name=sshd state=restarted enabled=yes
+
+# Update Kerberos authentication configuration
+  - name: Update kerberos authentication configuration
+    shell: authconfig --enablekrb5 --update
+
+
+# Add kerberos service to firewalld and reload
+  - name: Add kerberos to firewalld
+    firewalld: service=kerberos permanent=yes state=enabled
+
+
+# Enable and restart firewalld
+#
+  - name: Configure the required services
+    service: name={{ item }} state=restarted enabled=yes
+    with_items:
+      - firewalld
+
+
+

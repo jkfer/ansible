@@ -1,0 +1,1 @@
+sudo yum -y install wget && sudo wget http://widehat.opensuse.org/opensuse/distribution/leap/42.3/repo/oss/suse/noarch/python-pexpect-3.3-6.1.noarch.rpm && sudo rpm -ivh python-pexpect-3.3-6.1.noarch.rpm

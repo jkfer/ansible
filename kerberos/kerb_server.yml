@@ -1,0 +1,137 @@
+- hosts: 192.168.0.30
+  user: joseph
+  sudo: yes
+  gather_facts: yes
+  
+  #vars_prompt:
+   # - name: pr_password
+   #   prompt: Enter the kadmin password you would like to set
+   # - name: user_password
+   #   prompt: Enter one password to use for root/admin, joseph and testuser principles
+  
+  vars:
+   pr_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          63623535343733383537646333353162636232623961326564613338353134313335323030623038
+          3466353864303534336465633231303762363132376338630a623439643339386534326264613465
+          65363235376238333163363534653335313333353630323133656432623338303731643937303837
+          3163306538636161660a316364313865663166313733333131643762306333353035306334353166
+          3031
+   user_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          63623535343733383537646333353162636232623961326564613338353134313335323030623038
+          3466353864303534336465633231303762363132376338630a623439643339386534326264613465
+          65363235376238333163363534653335313333353630323133656432623338303731643937303837
+          3163306538636161660a316364313865663166313733333131643762306333353035306334353166
+          3031
+  tasks:
+# Install components required for the server
+  - name: install kerberos server requirements
+    yum: pkg={{ item }} state=latest
+    with_items:
+      - krb5-server
+      - krb5-workstation
+      - pam_krb5
+      - firewalld
+
+# Copy configuration files to the respective folders
+  - name: Copy kerberos configuration file "kdc.conf" to /var/kerberos/krb5kdc/kdc.conf (jinja templates)
+    copy: src='kdc.conf' dest='/var/kerberos/krb5kdc/kdc.conf' owner='root' group='root' mode='0644'
+#    template: src='kdc.conf' dest='/var/kerberos/krb5kdc/kdc.conf' owner='root' group='root' mode='644'
+
+# Copy configuration files to the respective folders
+  - name: Copy kerberos configuration file "krb5.conf" to /etc/krb5.conf (jinja templates)
+    copy: src='krb5.conf' dest='/etc/krb5.conf' owner='root' group='root' mode='0644'
+#    template: src='krb5.conf' dest='/etc/krb5.conf' owner='root' group='root' mode='644'
+
+
+# Copy configuration files to the respective folders
+  - name: Copy kerberos configuration file "kadm5.acl" to /var/kerberos/krb5kdc/kadm5.acl (jinja templates)
+    template: src='kadm5.acl' dest='/var/kerberos/krb5kdc/kadm5.acl' owner='root' group='root' mode='0644'
+
+# Create KDC master key
+  - name: Create KDC master key
+    expect:
+      command: kdb5_util create -s -r JKF.LOCAL
+      responses: 
+        'Enter KDC database master key:': "{{ pr_password }}" 
+        'Re-enter KDC database master key to verify:': "{{ pr_password }}" 
+
+# Enable and start the krb5kdc and kadmin services
+  - name: Configure the required services
+    service: name={{ item }} state=restarted enabled=yes
+    with_items:
+      - krb5kdc
+      - kadmin
+      - firewalld
+
+
+# Copy users_list file over to server first.
+# users to be added with pw
+# root/admin <pssword>
+# testuser <pssword>
+
+
+# Copy users_list.txt file to the server
+  - name: Copy users_list.txt file to the server
+    copy: src='users_list.txt' dest='/home/joseph' owner='joseph' group='joseph' mode='0644'
+
+
+# Add users via kadmin.local from the users_list file
+  - name: Add Users
+    shell: awk '{ print "ank -pw", "{{user_password}}", $1 }' < /home/joseph/users_list.txt | sudo /usr/sbin/kadmin.local
+
+# Add random key for the server
+  - name: Add Server
+    shell: echo "ank -randkey host/`hostname`" | sudo /usr/sbin/kadmin.local
+
+# Store changes to the local keytab file
+  - name: Save all configuration changes to keytab file
+    shell: echo "ktadd host/`hostname`" | sudo /usr/sbin/kadmin.local
+
+
+
+# Configuring the GSSAPIAuthentication and GSSAPIDelegateCredentials
+  - name: replace lines in /etc/ssh/ssh_config
+    lineinfile: path=/etc/ssh/ssh_config regexp="GSSAPIAuthentication no" line="GSSAPIAuthentication yes"
+
+
+  - name: replace lines in /etc/ssh/ssh_config
+    lineinfile: path=/etc/ssh/ssh_config regexp="GSSAPIDelegateCredentials no" line="GSSAPIDelegateCredentials yes"
+
+
+# Reload the SSHD service
+  - name: Reload the SSH Service
+    service: name=sshd state=restarted enabled=yes
+
+# Update Kerberos authenticatino configuration
+  - name: Update kerberos authentication configuration
+    shell: authconfig --enablekrb5 --update
+
+
+
+# Configure firewall:
+#
+#
+# Copy the kerberos.xml file to the destination /etc/firewalld/services
+  - name: Copy kerberob configuration file "kerberos.xml" to /etc/firewalld/services
+    copy: src='kerberos.xml' dest='/etc/firewalld/services' owner='root' group='root' mode='0644'
+
+# Add kerberos service to firewalld and reload
+  - name: Add kerberos to firewalld
+    firewalld: service=kerberos permanent=yes state=enabled
+
+# Restart firewalld
+  - name: Restart firewalld
+    service: name={{ item }} state=restarted enabled=yes 
+    with_items:
+      - krb5kdc
+      - kadmin
+      - firewalld
+      
+# add testuser, set password (and add to the wheel group ??)
+  - name: Creating testuser
+    user: name=testuser password='{{user_password}}' state=present shell=/bin/bash createhome=yes
+
+#  - debug: msg='{{user_password}}'
+#  - debug: msg='{{pr_password}}'
