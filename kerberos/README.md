@@ -1,46 +1,29 @@
-Role Name
+Basic Kerberos Server and Cient Configuration
 =========
 
-#### Share a directory to clients using NFS.
-
-- NFS Installation takes distribution into consent - RedHat/CentOS vs Debian
-- Assuming firewall does not block the NFS reachability
--- configuration of firewall can be extended upon
-- This is a basic fileshare sharing one folder to all clients. Can be extended on:
--- Shared to specific domain
--- Group access control: Access to NFS be granted only to members of specific group
-
-
-Requirements
+Prerequisite
 ------------
 
-#### Inventory Groups:
-- nfs_server: One host to provide the newtwork file share location to clients
-- nfs_client: Hosts readily available to access the network files share. Shared directory to be mounted here.
+- The ansible playbooks kerb_server.yml and kerb_client.yml are designed to work over CENTOS
+- Need pre-configured kerberos configuration files
+- expect ansible module is needed
 
-#### Server/client distribution to be RedHat/CentOS/Debian
-
-Role Variables
---------------
-
-#### In nfsconfig/vars/main.yml
-- nfs_share: Folder location in nfs_server that is to be shared to the clients
-- nfs_mountpoint: Mount point in nfs clients
-
-#### In Playbook:
-- type: "server" or "client". Defined within the play to recognize server/client roll-out
+#### Dependency Files:
+- kadm5.acl
+- kdc.conf
+- krb5.conf
+- users_list.txt (list of users for kerberos principles)
 
 
-Dependencies
+Other Notes
 ------------
 
-- Tested on Ansible 2.6 only
+- Kadmin password, vault password and all user passwords are defaulted to '123456' by using ansible vault. prompt variables can be used to dynamicaly input the passwords
+- For readability, usability and demonstration the playbook is created as is
+- For an optimum situation the playbook itsellf is best created with ansible vault due to the passwords involved
 
-- Jinja template for nfs_server: nfsconfig/templates/exports.j2
-- Handlers in nfsconfig/handlers/main.yml: Hnadler to restart NFS services
+Running
+---------
 
-
-Example Playbook
-----------------
-
-See ../nfsconfig.yml for sample playbook.
+- ansible-playbook kerb_server.yml --ask-vault-pass
+- ansible-playbook kerb_client.yml --ask-vault-pass
