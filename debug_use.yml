@@ -2,17 +2,19 @@
 # parameters: var, msg, verbosity. Print output
 
 
-- hosts: apacheweb
-  user: test
-  sudo: yes
-  connection: ssh
-  gather_facts: no
+- hosts: all
+  user: joseph
+  become: yes
+  gather_facts: yes
+
   tasks:
     - name: Installing telnet
-      yum: pkg=telnet state=latest
-    - name: Installing Lynx
-      yum: pkg=lynx state=latest
+      yum: pkg={{ item }} state=absent
+      with_items:
+        - telnet
+        - lynx
+
     - name: List Home
-      command: ls -al /home/test
+      command: ls -al /home/joseph
       register: result
     - debug: var=result
