@@ -1,0 +1,7 @@
+<VirtualHost *:80>
+        ServerAdmin admin@{{ ansible_nodename }}
+        DocumentRoot /var/www/html/
+        ServerName {{ ansible_nodename }}
+        ErrorLog logs/{{ ansible_nodename }}-error_log
+        CustomLog logs/{{ ansible_nodename }}-access_log combined
+</VirtualHost>
