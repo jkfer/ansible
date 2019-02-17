@@ -2,22 +2,16 @@
 # Can use "become" and become_mode/method instead of sudo.
 
 - hosts: apacheweb
-  user: test
-  sudo: yes
+  user: joseph
+  become: yes
   connection: ssh
   gather_facts: no
-  vars:
-    playbook_version: 0.1b
-#  vars_files:
-#    - conf/copyright.yml
-#    - conf/webdefaults.yml
-#  vars_prompt:
-#    - name: Web_Domain
-#      prompt: Web Domain
+  
   tasks:
     - name: Install Apache Web Server
-      action: yum name=httpd state=installed
+      yum: name=httpd state=installed
       notify: Restart HTTPD
+  
   handlers:
     - name: Restart HTTPD
       action: service name=httpd state=restarted

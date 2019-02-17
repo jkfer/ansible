@@ -1,9 +1,9 @@
 --- # Loop playbook
 - hosts: apacheweb
-  user: test
-  sudo: yes
-  connection: ssh
+  user: joseph
+  become: yes
   gather_facts: no
+
   tasks:
     - name: Add a list of users
       user: name={{ item }} state=present
