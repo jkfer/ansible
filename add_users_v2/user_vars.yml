@@ -1,0 +1,10 @@
+# These are the user variables:
+#
+#
+users:
+  - username: kevin
+    sudo: yes
+
+  - username: olyv
+    sudo: no
+

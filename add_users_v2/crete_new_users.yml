@@ -1,0 +1,66 @@
+---
+- hosts: 192.168.0.29, 192.168.0.22
+  user: root
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars_files:
+    - user_vars.yml
+
+  tasks:
+
+# Adding the users defines in the user_vars directory:
+    - name: Adding the users
+      user: name={{ item.username }} shell=/bin/bash create_home=yes
+      with_items: "{{ users }}"
+
+
+# Adding the sudo users to wheel group
+    - name: Providing sudo permissions where applicable
+      user: name={{ item.username }} groups=wheel append=yes
+      when: "{{ item.sudo }} == True"
+      with_items: "{{ users }}"
+
+
+# Generatinng SSH Keys for the users
+    - name: Generate SSH keys for the users in main server
+      user: 
+        name: "{{ item.username }}"
+        generate_ssh_key: yes 
+        ssh_key_type: rsa 
+        ssh_key_bits: 2048
+        ssh_key_file: "/home/{{ item.username }}/.ssh/id_rsa"
+      with_items: "{{ users }}"
+
+
+# Ensuring .ssh folder is present within the /home/{{ item.username }}/ directory with the correct permssions
+    - name: Create .ssh directory within new user folder
+      file: 
+        path: "/home/{{ item.username }}/.ssh" 
+        state: directory 
+        owner: "{{ item.username }}" 
+        group: "{{ item.username }}" 
+        mode: "0755"
+      with_items: "{{ users }}"
+
+
+# Copying the user SSH keys to all servers from main:
+    - name: Copy SSH keys to destination
+      authorized_key: 
+        user: "{{ item.username }}" 
+        state: present
+        key: "{{ lookup('file', '/home/{{ item.username }}/.ssh/id_rsa.pub') }}"
+      with_items: "{{ users }}"
+
+
+# Enable public key authentication in /etc/ssh/sshd_config accross all servers
+    - name: Enable public key authentication
+      lineinfile: 
+        path: "/etc/ssh/sshd_config" 
+        regexp: 'PubkeyAuthentication' 
+        line: 'PubkeyAuthentication yes'
+
+
+# Reload sshd service on all servers
+    - name: Reload SSHD Service
+      service: name=sshd state=reloaded enabled=yes
