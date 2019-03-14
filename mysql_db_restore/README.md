@@ -12,5 +12,5 @@
 - This is the sample backup database that is going to be restored. 
 
 
-## Assumtions:
+## Assumptions:
 - Remote host does not have mysql installed or configured.
