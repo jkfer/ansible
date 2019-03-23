@@ -1,6 +1,8 @@
+---
 - hosts: all
   user: joseph
-  sudo: yes
+  become: yes
+  become_method: sudo
   gather_facts: yes
   tasks:
     - name: Update all packages in VMS
@@ -8,6 +10,4 @@
       register: update
     
     - name: write update log to local file
-      # local_action: shell echo `date` >> /home/joseph/ansible_logs/'{{ ansible_hostname }}'.update.log
-      # local_action: copy content={{ update }} dest=/home/joseph/ansible_logs/{{ ansible_hostname }}.update.log
       local_action: shell echo `date`, ":\n'{{ update }}'"  >> /home/joseph/ansible_logs/'{{ ansible_hostname }}'.update.log

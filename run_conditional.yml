@@ -1,8 +1,9 @@
---- # 'WHEN' playbook example. Distribution based installation
+--- # 'WHEN' playbook example. Distribution based installation test.
+
 - hosts: all
-  user: joseph
+  user: root
   become: yes
-  connection: ssh
+  become_method: sudo
   gather_facts: yes
   tasks:
     - name: Install apache appropriately to distribution type (Debian/Ubuntu)

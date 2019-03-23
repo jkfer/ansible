@@ -4,6 +4,7 @@
 - hosts: apacheweb
   user: joseph
   become: yes
+  become_method: sudo
   connection: ssh
   gather_facts: no
   
