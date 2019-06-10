@@ -1,7 +1,7 @@
 # vim:ft=ansible:
 ---
 - hosts: 192.168.0.30
-  user: root
+  user: joseph
   become: yes
   become_method: sudo
   gather_facts: yes
